@@ -1,49 +1,81 @@
-# Product Requirements — Harnessed Agent Swarm
+# PRD: Harnessed Agent Swarm
 
-## Vision
+## Product Goal
 
-A **Harnessed Agent Swarm** for high-performance AI research and testing: multiple specialized agents (Architect, Researcher, DevOps, QA) operating with shared context, infinite-scale context handling, multi-modal support, and HCI/UX guardrails—aligned with LFM2 efficiency and edge compatibility.
+Build an agent-driven research and testing toolkit aligned with LFM2 constraints: efficient inference, hybrid MoE behavior, and edge-aware execution.
 
----
+Primary references:
 
-## Goals
+- LFM2 model docs: https://huggingface.co/docs/transformers/model_doc/lfm2_moe
+- LFM2-8B blog: https://www.liquid.ai/blog/lfm2-8b-a1b-an-efficient-on-device-mixture-of-experts
+- LFM2-24B blog: https://www.liquid.ai/blog/lfm2-24b-a2b
 
-### 1. Infinite Context Scaling & Context Refreshing
+## Pillar 1: Infinite Context Scaling and Context Refresh
 
-- **Infinite context scaling:** Support long contexts (e.g. 32K+; extend toward 128K+) with efficient attention or state management (e.g. sliding window, summarization, chunking).
-- **Context refreshing:** Mechanisms to update, compress, or replace context without full recompute; reference LFM2’s efficient state and hardware-in-the-loop design where applicable.
-- **Non-goal:** Requiring unbounded context in a single call; bounded but large context with refresh is acceptable.
+### Requirement
 
-### 2. Multi-Modal Support
+Agents must retain long-horizon task state while supporting explicit context refresh from source artifacts.
 
-| Modality   | Scope                                      |
-|-----------|---------------------------------------------|
-| **Vision**| Image inputs for VLMs; optional local (e.g. Ollama LFM2) or cloud APIs. |
-| **Reasoning** | Chain-of-thought, plan-and-execute, tool use (MCP, SDKs). |
-| **Coding**| Code generation, execution sandbox, dataset/benchmark scripting (e.g. Kaggle, custom evals). |
+### Functional Scope
 
-Integration points: [OpenAI API](https://platform.openai.com/docs), [Anthropic](https://docs.anthropic.com/en/api/getting-started), [Ollama](https://docs.ollama.com/api), [DeepSeek](https://api-docs.deepseek.com/).
+- Ingest docs and experiment outputs as refreshable context packets.
+- Maintain compact summaries plus citations for replay.
+- Support checkpointing and resume for research tasks.
 
-### 3. HCI/UX for AI Guardrails
+### Acceptance Criteria
 
-- **Human-in-the-loop:** Clear handoff points (e.g. approvals, confirmations) for sensitive or irreversible actions.
-- **Transparency:** Logs, trace IDs, and optional explanations for agent decisions.
-- **Safety defaults:** Rate limits, sandboxing, and configurable guardrails (e.g. PII filters, content policy).
-- **UX:** CLI and/or minimal UI for runs, config, and inspection; documentation first (PLAYBOOK, README).
+- A task can run in multiple sessions without losing citations.
+- Context refresh can replace stale state with newest source docs.
+- Generated reports map every claim to a URL in `REFERENCES.md`.
 
----
+## Pillar 2: Multi-Modal Capability (Vision, Reasoning, Coding)
 
-## Out of Scope (Initial 2 Months)
+### Requirement
 
-- Full production deployment and SLAs
-- Custom model training (beyond scripting on `training` branch)
-- Legal/compliance certification
+The swarm must coordinate reasoning and code-focused agents, with optional vision-capable components when evaluation artifacts include images.
 
----
+### Functional Scope
 
-## Success Criteria
+- API and SDK integration targets:
+  - OpenAI platform docs: https://developers.openai.com/api/docs
+  - OpenAI MCP docs: https://developers.openai.com/codex/mcp
+  - Anthropic API getting started: https://docs.anthropic.com/en/api/getting-started
+  - DeepSeek API docs: https://api-docs.deepseek.com/
+- Hugging Face research tooling:
+  - Transformers: https://huggingface.co/docs/transformers
+  - Accelerate: https://huggingface.co/docs/accelerate
+  - PEFT: https://huggingface.co/docs/peft
+  - Smolagents: https://huggingface.co/docs/smolagents
 
-- PLAYBOOK executable (venv + Docker + GitHub Pages).
-- Ref-Agent link list verified and documented.
-- PRD and RESEARCH_DOC published; Apache 2.0 in place.
-- Clear path to add first “swarm” workflow (e.g. research → validate → commit).
+### Acceptance Criteria
+
+- Toolkit can execute coding and reasoning workflows with provider abstraction.
+- Agent outputs include reproducible steps and references.
+
+## Pillar 3: HCI/UX Guardrails
+
+### Requirement
+
+Users must receive transparent, auditable outputs with minimal cognitive overhead.
+
+### Functional Scope
+
+- Enforce citation-first writing for research docs.
+- Restrict vague claims; require concrete scope and testability.
+- Surface branch, environment, and validation status in every runbook.
+
+### Acceptance Criteria
+
+- Every deliverable has concise structure and traceable references.
+- No undocumented external links are introduced.
+
+## Non-Goals
+
+- Training a new base foundation model in this phase.
+- Building a production-grade hosted inference platform.
+
+## Success Metrics (2-Month Window)
+
+- 100% of doc links resolve successfully.
+- Core branch flow (`development`/`training`/`benchmarking` -> `research` -> `main`) is documented and followed.
+- Environment setup is reproducible on a clean machine in under 30 minutes.
